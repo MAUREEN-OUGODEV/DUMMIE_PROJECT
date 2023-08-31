@@ -1,0 +1,54 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - main # specify your main branch here
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Setup Python
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9' # specify the Python version
+    
+    # Install Dependencies
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+
+    # Run Tests
+    - name: Run Tests
+      run: python manage.py test
+
+    # Code Quality Check
+    - name: Code Quality Check
+      run: pylint myapp/
+
+    # Database Setup
+    - name: Database Setup
+      run: |
+        sudo apt-get install -y postgresql
+        sudo service postgresql start
+        psql -U postgres -c "CREATE DATABASE mydb;"
+
+    # Database Migrations
+    - name: Database Migrations
+      run: python manage.py migrate
+
+    # Collect Static Files
+    - name: Collect Static Files
+      run: python manage.py collectstatic --noinput
+
+    # Deployment
+    - name: Deployment
+      run: |
+        echo "Deploy to production"
+        # Add deployment commands here
